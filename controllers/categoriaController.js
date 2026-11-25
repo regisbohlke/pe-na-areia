@@ -3,16 +3,25 @@ import Produto from '../models/Produto.js';
 
 export const listarCategorias = async (req, res) => {
     try {
-        const categorias = await Categoria.find()
-            .sort({ ordemExibicao: 1, nome: 1 });
+        const busca = req.query.busca || '';
 
-        res.render('admin/categorias/listar', { categorias });
+        const categorias = await Categoria.find({
+            nome: { $regex: busca, $options: 'i' }
+        }).sort({ ordemExibicao: 1, nome: 1 });
+
+        res.render('admin/categorias/listar', {
+            categorias,
+            busca
+        });
 
     } catch (erro) {
         console.error('Erro ao listar categorias:', erro);
         res.status(500).send('Erro ao carregar categorias.');
     }
 };
+
+
+
 
 export const cadastrarCategoria = async (req, res) => {
     try {
