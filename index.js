@@ -2,6 +2,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import conectarBanco from './config/conexao.js';
+import categoriaRoutes from './routes/categoriaRoutes.js';
 
 // Carrega as variáveis do arquivo .env
 dotenv.config();
@@ -23,6 +24,8 @@ app.use(express.json());
 
 // Arquivos públicos (CSS, imagens e JavaScript)
 app.use(express.static('public'));
+
+app.use('/admin/categorias', categoriaRoutes);
 
 // Rota inicial para teste
 app.get('/', (req, res) => {
