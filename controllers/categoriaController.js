@@ -111,3 +111,21 @@ export const excluirCategoria = async (req, res) => {
         res.status(500).send('Erro ao excluir categoria.');
     }
 };
+
+export const visualizarCategoria = async (req, res) => {
+    try {
+        const categoria = await Categoria.findById(req.params.id);
+
+        if (!categoria) {
+            return res.status(404).send('Categoria não encontrada.');
+        }
+
+        res.render('admin/categorias/visualizar', {
+            categoria
+        });
+
+    } catch (erro) {
+        console.error('Erro ao visualizar categoria:', erro);
+        res.status(500).send('Erro ao carregar categoria.');
+    }
+};

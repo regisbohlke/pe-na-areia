@@ -3,7 +3,8 @@ import { listarCategorias,
          cadastrarCategoria,
          buscarCategoriaPorId, 
         atualizarCategoria,
-        excluirCategoria } from '../controllers/categoriaController.js';
+        excluirCategoria,
+        visualizarCategoria } from '../controllers/categoriaController.js';
 
 const router = express.Router();
 
@@ -26,5 +27,7 @@ router.get('/editar/:id', buscarCategoriaPorId);
 router.post('/editar/:id', atualizarCategoria);
 // excluir categoria
 router.post('/excluir/:id', excluirCategoria);
+// visualizar
+router.get('/visualizar/:id', visualizarCategoria);
 
 export default router;
