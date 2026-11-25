@@ -1,4 +1,5 @@
 import Categoria from '../models/Categoria.js';
+import Produto from '../models/Produto.js';
 
 export const listarCategorias = async (req, res) => {
     try {
@@ -74,5 +75,30 @@ export const atualizarCategoria = async (req, res) => {
     } catch (erro) {
         console.error('Erro ao atualizar categoria:', erro);
         res.status(500).send('Erro ao atualizar categoria.');
+    }
+};
+
+export const excluirCategoria = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Verifica se existem produtos vinculados
+        const produtosVinculados = await Produto.findOne({
+            categoria: id
+        });
+
+        if (produtosVinculados) {
+            return res.status(400).send(
+                'Não é possível excluir esta categoria, pois existem produtos vinculados a ela.'
+            );
+        }
+
+        await Categoria.findByIdAndDelete(id);
+
+        res.redirect('/admin/categorias');
+
+    } catch (erro) {
+        console.error('Erro ao excluir categoria:', erro);
+        res.status(500).send('Erro ao excluir categoria.');
     }
 };

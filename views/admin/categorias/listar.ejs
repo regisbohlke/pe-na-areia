@@ -80,9 +80,16 @@
                                             Editar
                                       </a>
                                     
-                                        <button class="btn btn-sm btn-outline-danger" disabled>
-                                            Excluir
-                                        </button>
+                                        <form
+    action="/admin/categorias/excluir/<%= categoria._id %>"
+    method="POST"
+    style="display: inline;"
+    onsubmit="return confirm('Tem certeza que deseja excluir esta categoria?');"
+>
+    <button type="submit" class="btn btn-sm btn-outline-danger">
+        Excluir
+    </button>
+</form>
                                     </td>
                                 </tr>
                             <% }) %>

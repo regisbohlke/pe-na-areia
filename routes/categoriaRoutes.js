@@ -2,7 +2,8 @@ import express from 'express';
 import { listarCategorias,
          cadastrarCategoria,
          buscarCategoriaPorId, 
-        atualizarCategoria } from '../controllers/categoriaController.js';
+        atualizarCategoria,
+        excluirCategoria } from '../controllers/categoriaController.js';
 
 const router = express.Router();
 
@@ -23,5 +24,7 @@ router.get('/editar/:id', buscarCategoriaPorId);
 
 // Atualizar categoria
 router.post('/editar/:id', atualizarCategoria);
+// excluir categoria
+router.post('/excluir/:id', excluirCategoria);
 
 export default router;
