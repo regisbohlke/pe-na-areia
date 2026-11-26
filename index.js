@@ -3,6 +3,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import conectarBanco from './config/conexao.js';
 import categoriaRoutes from './routes/categoriaRoutes.js';
+import produtoRoutes from './routes/produtoRoutes.js';
 
 // Carrega as variáveis do arquivo .env
 dotenv.config();
@@ -30,6 +31,8 @@ app.use('/admin/categorias', categoriaRoutes);
 // Rota inicial para teste
 app.get('/', (req, res) => {
     res.send('Pé na Areia - Sistema de Pedidos');
+// Onde está app.use('/admin/categorias', categoriaRoutes):
+    app.use('/admin/produtos', produtoRoutes);
 });
 
 // Inicia o servidor após conectar ao banco
