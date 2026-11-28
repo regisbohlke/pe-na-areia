@@ -1,25 +1,20 @@
 
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visualizar pedido | Pé na Areia</title>
+<%- include('../../partials/head', {
+    tituloPagina: 'Detalhes do Pedido | Pé na Areia'
+}) %>
 
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-    >
-</head>
-<body>
+<%- include('../../partials/navbar', {
+    paginaAtiva: 'pedidos'
+}) %>
 
     <main class="container py-4">
 
+        <!-- Cabeçalho -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h1 class="h3">Detalhes do pedido</h1>
+                <h1 class="h3 mb-1">Detalhes do pedido</h1>
                 <p class="text-muted mb-0">
-                    Consulte as informações do pedido.
+                    Consulte e gerencie as informações do pedido.
                 </p>
             </div>
 
@@ -28,91 +23,229 @@
             </a>
         </div>
 
-        <div class="card shadow-sm">
+        <!-- Informações principais -->
+        <div class="card shadow-sm mb-4">
             <div class="card-body">
 
-                <h5>Pedido #<%= pedido.numero %></h5>
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <h2 class="h5 mb-1">
+                            Pedido #<%= pedido.numero %>
+                        </h2>
 
-                <hr>
-
-                <p><strong>Cliente:</strong> <%= pedido.nomeCliente %></p>
-
-                <p>
-                    <strong>Data:</strong>
-                    <%= new Date(pedido.dataPedido).toLocaleString('pt-BR') %>
-                </p>
-
-                <p>
-                    <strong>Status atual:</strong>
-                    <%= pedido.status %>
-                </p>
-
-                <hr>
-
-                <h5>Itens do pedido</h5>
-
-                <% pedido.itens.forEach(item => { %>
-                    <div class="mb-2">
-                        <strong>
-                            <%= item.produto ? item.produto.nome : 'Produto não encontrado' %>
-                        </strong>
-                        — Quantidade: <%= item.quantidade %>
+                        <small class="text-muted">
+                            Realizado em:
+                            <%= new Date(pedido.dataPedido).toLocaleString('pt-BR') %>
+                        </small>
                     </div>
-                <% }) %>
+
+                    <span class="badge bg-primary fs-6">
+                        <%= pedido.status %>
+                    </span>
+                </div>
 
                 <hr>
 
-                <h5>Atualizar status</h5>
+                <h3 class="h6">Dados do cliente</h3>
 
-                <form action="/admin/pedidos/atualizar-status/<%= pedido._id %>" method="POST">
+                <p class="mb-2">
+                    <strong>Nome:</strong>
+                    <%= pedido.nomeCliente %>
+                </p>
+
+                <p class="mb-0">
+                    <strong>WhatsApp:</strong>
+                    <%= pedido.whatsapp %>
+                </p>
+
+            </div>
+        </div>
+
+        <!-- Produtos -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+
+                <h3 class="h5 mb-3">Produtos do pedido</h3>
+
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered align-middle">
+
+                        <thead class="table-light">
+                            <tr>
+                                <th>Produto</th>
+                                <th class="text-center">Quantidade</th>
+                                <th class="text-end">Preço unitário</th>
+                                <th class="text-end">Subtotal</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            <% pedido.itens.forEach(item => { %>
+
+                                <tr>
+                                    <td>
+                                        <%= item.nome %>
+                                    </td>
+
+                                    <td class="text-center">
+                                        <%= item.quantidade %>
+                                    </td>
+
+                                    <td class="text-end">
+                                        <%= Number(item.precoUnitario).toLocaleString('pt-BR', {
+                                            style: 'currency',
+                                            currency: 'BRL'
+                                        }) %>
+                                    </td>
+
+                                    <td class="text-end">
+                                        <%= Number(item.subtotal).toLocaleString('pt-BR', {
+                                            style: 'currency',
+                                            currency: 'BRL'
+                                        }) %>
+                                    </td>
+                                </tr>
+
+                            <% }) %>
+
+                        </tbody>
+
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-end">
+                    <div class="text-end">
+                        <span class="text-muted">Valor total</span>
+
+                        <h3 class="text-success mb-0">
+                            <%= Number(pedido.valorTotal).toLocaleString('pt-BR', {
+                                style: 'currency',
+                                currency: 'BRL'
+                            }) %>
+                        </h3>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Atualização de status -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+
+                <h3 class="h5 mb-3">Atualizar status do pedido</h3>
+
+                <form
+                    action="/admin/pedidos/atualizar-status/<%= pedido._id %>"
+                    method="POST"
+                >
 
                     <select name="status" class="form-select mb-3" required>
-    <option value="Recebido" <%= pedido.status === 'Recebido' ? 'selected' : '' %>>Recebido</option>
-    <option value="Em preparação" <%= pedido.status === 'Em preparação' ? 'selected' : '' %>>Em preparação</option>
-    <option value="Pronto" <%= pedido.status === 'Pronto' ? 'selected' : '' %>>Pronto</option>
-    <option value="Concluído" <%= pedido.status === 'Concluído' ? 'selected' : '' %>>Concluído</option>
-    <option value="Cancelado" <%= pedido.status === 'Cancelado' ? 'selected' : '' %>>Cancelado</option>
-</select>
+
+                        <option value="Recebido" <%= pedido.status === 'Recebido' ? 'selected' : '' %>>
+                            Recebido
+                        </option>
+
+                        <option value="Em preparação" <%= pedido.status === 'Em preparação' ? 'selected' : '' %>>
+                            Em preparação
+                        </option>
+
+                        <option value="Pronto" <%= pedido.status === 'Pronto' ? 'selected' : '' %>>
+                            Pronto
+                        </option>
+
+                        <option value="Concluído" <%= pedido.status === 'Concluído' ? 'selected' : '' %>>
+                            Concluído
+                        </option>
+
+                        <option value="Cancelado" <%= pedido.status === 'Cancelado' ? 'selected' : '' %>>
+                            Cancelado
+                        </option>
+
+                    </select>
+
                     <button type="submit" class="btn btn-primary">
                         Atualizar status
                     </button>
 
                 </form>
-                <hr>
-
-<h5>Atualizar pagamento</h5>
-
-<p>
-    <strong>Pagamento atual:</strong>
-    <%= pedido.statusPagamento %>
-</p>
-
-<form action="/admin/pedidos/atualizar-pagamento/<%= pedido._id %>" method="POST">
-
-    <select name="statusPagamento" class="form-select mb-3" required>
-        <option value="Aguardando confirmação" <%= pedido.statusPagamento === 'Aguardando confirmação' ? 'selected' : '' %>>
-            Aguardando confirmação
-        </option>
-
-        <option value="Pago" <%= pedido.statusPagamento === 'Pago' ? 'selected' : '' %>>
-            Pago
-        </option>
-
-        <option value="Cancelado" <%= pedido.statusPagamento === 'Cancelado' ? 'selected' : '' %>>
-            Cancelado
-        </option>
-    </select>
-
-    <button type="submit" class="btn btn-success">
-        Atualizar pagamento
-    </button>
-
-</form>
 
             </div>
         </div>
 
+        <!-- Atualização de pagamento -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+
+                <h3 class="h5 mb-3">Pagamento</h3>
+
+                <p>
+                    <strong>Situação atual:</strong>
+                    <%= pedido.statusPagamento %>
+                </p>
+
+                <form
+                    action="/admin/pedidos/atualizar-pagamento/<%= pedido._id %>"
+                    method="POST"
+                >
+
+                    <select
+                        name="statusPagamento"
+                        class="form-select mb-3"
+                        required
+                    >
+
+                        <option value="Aguardando confirmação" <%= pedido.statusPagamento === 'Aguardando confirmação' ? 'selected' : '' %>>
+                            Aguardando confirmação
+                        </option>
+
+                        <option value="Pago" <%= pedido.statusPagamento === 'Pago' ? 'selected' : '' %>>
+                            Pago
+                        </option>
+
+                        <option value="Cancelado" <%= pedido.statusPagamento === 'Cancelado' ? 'selected' : '' %>>
+                            Cancelado
+                        </option>
+
+                    </select>
+
+                    <button type="submit" class="btn btn-success">
+                        Atualizar pagamento
+                    </button>
+
+                </form>
+
+            </div>
+        </div>
+
+
+        <!-- Exclusão do pedido -->
+        <div class="card shadow-sm border-danger mb-4">
+            <div class="card-body">
+
+                <h3 class="h5 text-danger mb-2">
+                    Excluir pedido
+                </h3>
+
+                <p class="text-muted">
+                    Esta ação excluirá permanentemente o pedido e não poderá ser desfeita.
+                </p>
+
+                <form
+                    action="/admin/pedidos/excluir/<%= pedido._id %>"
+                    method="POST"
+                    onsubmit="return confirm('Tem certeza de que deseja excluir este pedido? Esta ação não poderá ser desfeita.');"
+                >
+                    <button type="submit" class="btn btn-danger">
+                        Excluir pedido
+                    </button>
+                </form>
+
+            </div>
+        </div>
+
+
     </main>
 
-</body>
-</html>
+    <%- include('../../partials/footer') %>

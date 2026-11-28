@@ -3,6 +3,9 @@ import express from 'express';
 import dotenv from 'dotenv';
 import conectarBanco from './config/conexao.js';
 import categoriaRoutes from './routes/categoriaRoutes.js';
+import pedidoRoutes from './routes/pedidoRoutes.js';
+import dashboardRoutes from './routes/dashboardRoutes.js';
+import produtoRoutes from './routes/produtoRoutes.js';
 
 // Carrega as variáveis do arquivo .env
 dotenv.config();
@@ -26,6 +29,12 @@ app.use(express.json());
 app.use(express.static('public'));
 
 app.use('/admin/categorias', categoriaRoutes);
+
+app.use('/admin/pedidos', pedidoRoutes);
+
+app.use('/admin/dashboard', dashboardRoutes);
+
+app.use('/admin/produtos', produtoRoutes);
 
 // Rota inicial para teste
 app.get('/', (req, res) => {

@@ -1,6 +1,9 @@
+
+import mongoose from 'mongoose';
 import Categoria from '../models/Categoria.js';
 import Produto from '../models/Produto.js';
 
+// Listar e pesquisar categorias
 export const listarCategorias = async (req, res) => {
     try {
         const busca = req.query.busca || '';
@@ -20,17 +23,31 @@ export const listarCategorias = async (req, res) => {
     }
 };
 
-
-
-
+// Cadastrar categoria
 export const cadastrarCategoria = async (req, res) => {
     try {
         const { nome, descricao, ordemExibicao, ativo } = req.body;
 
+        // Validar campos obrigatórios
+        if (!nome || !nome.trim()) {
+            return res.status(400).send('O nome da categoria é obrigatório.');
+        }
+
+        // Validar ordem de exibição
+        const ordem = ordemExibicao === '' || ordemExibicao === undefined
+            ? 0
+            : Number(ordemExibicao);
+
+        if (!Number.isInteger(ordem) || ordem < 0) {
+            return res.status(400).send(
+                'A ordem de exibição deve ser um número inteiro não negativo.'
+            );
+        }
+
         const novaCategoria = new Categoria({
-            nome,
-            descricao,
-            ordemExibicao: ordemExibicao || 0,
+            nome: nome.trim(),
+            descricao: descricao || '',
+            ordemExibicao: ordem,
             ativo: ativo === 'true'
         });
 
@@ -44,40 +61,67 @@ export const cadastrarCategoria = async (req, res) => {
     }
 };
 
+// Buscar categoria para edição
 export const buscarCategoriaPorId = async (req, res) => {
     try {
-        const categoria = await Categoria.findById(req.params.id);
+        const { id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).send('ID de categoria inválido.');
+        }
+
+        const categoria = await Categoria.findById(id);
 
         if (!categoria) {
             return res.status(404).send('Categoria não encontrada.');
         }
 
-        res.render('admin/categorias/editar', { categoria });
+        res.render('admin/categorias/editar', {
+            categoria
+        });
 
     } catch (erro) {
         console.error('Erro ao buscar categoria:', erro);
         res.status(500).send('Erro ao carregar categoria.');
     }
 };
+
+// Atualizar categoria
 export const atualizarCategoria = async (req, res) => {
     try {
+        const { id } = req.params;
         const { nome, descricao, ordemExibicao, ativo } = req.body;
 
-        await Categoria.findByIdAndUpdate(
-            req.params.id,
-            {
-                nome,
-                descricao,
-                ordemExibicao: ordemExibicao || 0,
-                ativo: ativo === 'true'
-            },
-            {
-                
-              returnDocument: 'after',
-              runValidators: true
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).send('ID de categoria inválido.');
+        }
 
-            }
-        );
+        if (!nome || !nome.trim()) {
+            return res.status(400).send('O nome da categoria é obrigatório.');
+        }
+
+        const ordem = ordemExibicao === '' || ordemExibicao === undefined
+            ? 0
+            : Number(ordemExibicao);
+
+        if (!Number.isInteger(ordem) || ordem < 0) {
+            return res.status(400).send(
+                'A ordem de exibição deve ser um número inteiro não negativo.'
+            );
+        }
+
+        const categoria = await Categoria.findById(id);
+
+        if (!categoria) {
+            return res.status(404).send('Categoria não encontrada.');
+        }
+
+        categoria.nome = nome.trim();
+        categoria.descricao = descricao || '';
+        categoria.ordemExibicao = ordem;
+        categoria.ativo = ativo === 'true';
+
+        await categoria.save();
 
         res.redirect('/admin/categorias');
 
@@ -87,12 +131,23 @@ export const atualizarCategoria = async (req, res) => {
     }
 };
 
+// Excluir categoria
 export const excluirCategoria = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Verifica se existem produtos vinculados
-        const produtosVinculados = await Produto.findOne({
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).send('ID de categoria inválido.');
+        }
+
+        const categoria = await Categoria.findById(id);
+
+        if (!categoria) {
+            return res.status(404).send('Categoria não encontrada.');
+        }
+
+        // Verificar se existem produtos vinculados à categoria
+        const produtosVinculados = await Produto.exists({
             categoria: id
         });
 
@@ -102,7 +157,7 @@ export const excluirCategoria = async (req, res) => {
             );
         }
 
-        await Categoria.findByIdAndDelete(id);
+        await categoria.deleteOne();
 
         res.redirect('/admin/categorias');
 
@@ -112,9 +167,16 @@ export const excluirCategoria = async (req, res) => {
     }
 };
 
+// Visualizar categoria
 export const visualizarCategoria = async (req, res) => {
     try {
-        const categoria = await Categoria.findById(req.params.id);
+        const { id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).send('ID de categoria inválido.');
+        }
+
+        const categoria = await Categoria.findById(id);
 
         if (!categoria) {
             return res.status(404).send('Categoria não encontrada.');
